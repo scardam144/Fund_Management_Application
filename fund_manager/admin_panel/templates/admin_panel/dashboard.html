@@ -1,0 +1,227 @@
+{% extends 'admin_panel/navbar.html' %}
+{% load custom_filters %}
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+
+    <style>
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+       
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <h2 class="dashboard-title">Fund Index Dashboard</h2>
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5>Total Investment Value</h5>
+                        <h3>₹{{ total_investment_value }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5>Total Current Value</h5>
+                        <h3>₹{{ total_current_value }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card {% if total_profit_loss >= 0 %}bg-success{% else %}bg-danger{% endif %} text-white">
+                    <div class="card-body">
+                        <h5>Total Profit/Loss</h5>
+                        <h3 class="text-white">
+                            ₹{{ total_profit_loss }}
+                        </h3>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- NAV Trend Chart -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">NAV Trend</h5>
+                <div class="chart-container">
+                    <canvas id="navChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Data Table -->
+        {% if stocks_data %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Stock Name</th>
+                            <th>Stock Price</th>
+                            <th>Quantity</th>
+                            <th>Investment Value</th>
+                            <th>Current Price</th>
+                            <th>Current Value</th>
+                            <th>Profit/Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in stocks_data %}
+                            <tr>
+                                <td>{{ stock.name }}</td>
+                                <td>₹{{ stock.stock_price }}</td>
+                                <td>{{ stock.quantity }}</td>
+                                <td>₹{{ stock.investment_value }}</td>
+                                <td>₹{{ stock.current_price }}</td>
+                                <td>₹{{ stock.current_value }}</td>
+                                <td>
+                                    {% if stock.profit_loss >= 0 %}
+                                        <span class="text-success">₹{{ stock.profit_loss }}</span>
+                                    {% else %}
+                                        <span class="text-danger">₹{{ stock.profit_loss }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-center text-muted">No stock data found.</p>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+
+    <!-- Bootstrap JS -->
+    <script>
+        // Directly embed the data from the Django context into JavaScript variables
+        const navDates = {{ nav_data.dates|safe }};
+        const navValues = {{ nav_data.values|safe }};
+    
+        console.log("NAV Dates:", navDates);
+        console.log("NAV Values:", navValues);
+    </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Embed raw data directly from Django context
+        const navDates = {{ nav_data.dates|safe }};
+        const navValues = {{ nav_data.values|safe }};
+
+        console.log("NAV Dates:", navDates);
+        console.log("NAV Values:", navValues);
+
+        // Check if the canvas element is available
+        const ctx = document.getElementById('navChart');
+
+        // Ensure the canvas exists and is not null
+        if (ctx) {
+            // Check if NAV trend is down or up
+            const isTrendDown = navValues[navValues.length - 1] < navValues[0]; // If last value is lower than the first, it's a downtrend
+            const borderColor = isTrendDown ? 'rgba(255, 0, 0, 1)' : 'rgba(76, 175, 80, 1)'; // Red for downtrend, Green for uptrend
+            const backgroundColor = isTrendDown ? 'rgba(255, 99, 132, 0.2)' : 'rgba(76, 175, 80, 0.2)'; // Lighter shade for the background
+
+            const navChartData = {
+                labels: navDates,
+                datasets: [{
+                    label: 'Net Asset Value (NAV)',
+                    data: navValues,
+                    borderColor: borderColor,
+                    backgroundColor: backgroundColor,
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+
+            const navChartConfig = {
+                type: 'line',
+                data: navChartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Dates'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'NAV'
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Create the chart if canvas is valid
+            new Chart(ctx, navChartConfig);
+        } else {
+            console.error("Canvas element not found!");
+        }
+    });
+</script>
+
+</body>
+
+</html>
+{% endblock %}

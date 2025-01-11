@@ -1,0 +1,73 @@
+{% extends 'admin_panel/navbar.html' %}
+{% load custom_filters %}
+{% block title %}
+Invest for {{ client.name }}
+{% endblock %}
+
+{% block content %}
+
+{% load custom_filters %}
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+        }
+
+        .page-title {
+            margin-top: 20px;
+            color: #4CAF50;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            padding: 5%;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-custom {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-custom:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+<body>
+
+
+    <div class="container mt-5">
+        <div class="form-container">
+            <h2 class="page-title">Invest for {{ client.name }}</h2>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="fund_index" class="form-label">Fund Index:</label>
+                    <select id="fund_index" name="fund_index" class="form-select" required>
+                        {% for fund in fund_indexes %}
+                            <option value="{{ fund.id }}">{{ fund.name }} (Current NAV: {{ fund.calculate_nav }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Amount:</label>
+                    <input type="number" id="amount" name="amount" class="form-control" step="0.01" required>
+                </div>
+
+                <button type="submit" class="btn btn-custom">Invest</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional for extra components like dropdowns) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+{% endblock %}
+
