@@ -42,12 +42,18 @@ def dashboard(request):
         # Process stock details for each fund
         for stock in fund.stocks.all():
             # Fetch the latest stock price using the utility function
-            stock.current_price = get_stock_price(stock.symbol)
+            if stock.name == 'OTHER':
+                stock.current_price = 2550
+            else:
+                stock.current_price = get_stock_price(stock.symbol)
 
             # Calculate values for each stock
-            investment_value = stock.price * stock.quantity
-            current_value = float(stock.current_price) * stock.quantity
-            profit_loss = current_value - investment_value
+            try:
+                investment_value = stock.price * stock.quantity
+                current_value = float(stock.current_price) * stock.quantity
+                profit_loss = current_value - investment_value
+            except:
+                pass
 
             # Add the stock details to stocks_data
             stocks_data.append({

@@ -37,7 +37,8 @@ def invest(request, client_id):
         value += amount  # Update client's balance
         client.balance = value
         client.save()
-
+        fund_index.invest(amount)
+        fund_index.save()
         messages.success(request, f"Investment of ₹{amount} in {fund_index.name} successful!")
         return redirect('client_list')
 

@@ -32,6 +32,8 @@ class FundIndex(models.Model):
             total_value += stock.current_price * stock.quantity
 
         if self.total_units > 0:
+            
+            print('@@@@@@@@@', total_value, self.total_units)
             nav = total_value / self.total_units
         else:
             nav = 0.0  # Avoid division by zero

@@ -1,5 +1,6 @@
 import yfinance as yf
 
+
 def get_stock_price(symbol):
     try:
         # Download stock data for the given symbol

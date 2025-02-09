@@ -3,6 +3,8 @@
 import os
 import sys
 
+#sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+#print("Current Directory:", os.getcwd())
 
 def main():
     """Run administrative tasks."""
