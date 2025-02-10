@@ -42,7 +42,7 @@ def dashboard(request):
         # Process stock details for each fund
         for stock in fund.stocks.all():
             # Fetch the latest stock price using the utility function
-            if stock.name == 'OTHER':
+            if stock.name == 'OTHER': #wjke
                 stock.current_price = 2550
             else:
                 stock.current_price = get_stock_price(stock.symbol)
